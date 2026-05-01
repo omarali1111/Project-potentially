@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Proposal: The Triage-Link Badge</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #34495e;
+        }
+        p {
+            margin-bottom: 15px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        .highlight {
+            background-color: #e8f4f8;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 20px;
+        }
+        .total-row {
+            font-weight: bold;
+            background-color: #fdfdfd;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>James Dyson Award Proposal: The "Triage-Link" System</h1>
+
+    <h2>1. The Problem</h2>
+    <p>Emergency Departments, such as Surrey Memorial, are experiencing severe "Access Block." Patients often wait 8 to 12 hours in unmonitored waiting rooms before seeing a physician. During this time, triage nurses are overwhelmed and cannot continuously monitor every individual. If a patient's condition rapidly deteriorates (e.g., dropping oxygen levels, sudden cardiac distress, or a physical fall), it often goes unnoticed until it becomes a critical emergency, increasing mortality rates and hospital liability.</p>
+
+    <h2>2. The Idea</h2>
+    <div class="highlight">
+        <p><strong>The Triage-Link Badge</strong> is a low-cost, reusable, non-invasive wearable device handed to patients upon ER check-in. It creates a "Virtual Ward" out of the waiting room.</p>
+    </div>
+    <p>Using embedded sensors and an ESP32 microcontroller, the badge continuously monitors heart rate, blood oxygen saturation (SpO2), and patient orientation (fall detection). Rather than triggering loud alarms, the device processes the data locally and uses a wireless protocol (ESP-NOW or Wi-Fi) to update a centralized dashboard at the nurse's station. If vitals cross a critical threshold, the system silently flags the patient, enabling immediate intervention.</p>
+
+    <h2>3. Bill of Materials (BOM) & Estimated Costs</h2>
+    <p><em>Prices are estimated in CAD based on standard inventory from Lee's Electronic Components (Vancouver) and Amazon.ca for quick procurement.</em></p>
+    <table>
+        <thead>
+            <tr>
+                <th>Component</th>
+                <th>Purpose</th>
+                <th>Supplier Concept</th>
+                <th>Est. Cost (CAD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>ESP32-C3 or ESP32-S3 Dev Board</td>
+                <td>Core processing, Wi-Fi/Bluetooth, low-power sleep states.</td>
+                <td>Lee's / Amazon</td>
+                <td>$12.00</td>
+            </tr>
+            <tr>
+                <td>MAX30102 Pulse Oximeter Module</td>
+                <td>Non-invasive optical heart rate and SpO2 monitoring.</td>
+                <td>Amazon.ca</td>
+                <td>$10.00</td>
+            </tr>
+            <tr>
+                <td>MPU-6050 6-DOF IMU</td>
+                <td>Orientation tracking (fall detection) and breathing motion.</td>
+                <td>Lee's Electronic</td>
+                <td>$6.00</td>
+            </tr>
+            <tr>
+                <td>3.7V 500mAh LiPo Battery & TP4056 Module</td>
+                <td>Untethered power and safe charging circuit.</td>
+                <td>Lee's / Amazon</td>
+                <td>$10.00</td>
+            </tr>
+            <tr>
+                <td>Mini Haptic/Vibration Motor</td>
+                <td>Patient feedback (e.g., "Nurse is calling you").</td>
+                <td>Lee's Electronic</td>
+                <td>$3.00</td>
+            </tr>
+            <tr>
+                <td>Misc. (Perf-board, Wires, PLA/PETG Filament)</td>
+                <td>Prototyping and 3D printing the hygienic enclosure.</td>
+                <td>Local Supply</td>
+                <td>$15.00</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="3" style="text-align: right;">Estimated Total per Prototype:</td>
+                <td>~$56.00</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>4. Implementation Procedure</h2>
+    <h3>Phase 1: Breadboard Proof of Concept (The Brain)</h3>
+    <ul>
+        <li>Wire the MAX30102 and MPU-6050 sensors to the ESP32 via the I2C bus (SDA/SCL pins).</li>
+        <li>Write firmware in C++ (Arduino IDE/PlatformIO) to initialize sensors and read raw values.</li>
+        <li>Implement basic DSP (Digital Signal Processing) to calculate a stable BPM and SpO2 percentage from the optical noise.</li>
+    </ul>
+
+    <h3>Phase 2: Connectivity & Logic (The Bridge)</h3>
+    <ul>
+        <li>Configure the ESP32 to connect to a local Wi-Fi network or utilize ESP-NOW for peer-to-peer communication to a "master" receiver.</li>
+        <li>Write threshold logic: <code>if (SpO2 < 90 || BPM > 120) { triggerAlert(); }</code></li>
+        <li>Set up a simple MQTT broker (like Mosquitto) or a web dashboard (Node-RED / Blynk) to visualize the incoming telemetry in real-time.</li>
+    </ul>
+
+    <h3>Phase 3: Hardware Miniaturization (The Form Factor)</h3>
+    <ul>
+        <li>Transition the circuit from a breadboard to a soldered perf-board, keeping the layout as compact as possible.</li>
+        <li>Design a custom PCB layout if time permits, routing the I2C traces carefully to avoid noise.</li>
+        <li>Integrate the TP4056 charging circuit and LiPo battery.</li>
+    </ul>
+
+    <h3>Phase 4: Enclosure & Testing (The Dyson Finish)</h3>
+    <ul>
+        <li>Design a CAD model for the enclosure. Focus on a "clip-on" mechanism that keeps the MAX30102 flush against the skin (collarbone or wrist).</li>
+        <li>3D print the housing using PETG or a smooth material that simulates medical-grade, easily sanitizable plastics.</li>
+        <li>Conduct iterative testing: measure the signal degradation when the user walks vs. sits, and refine the software filters accordingly.</li>
+    </ul>
+
+    <h2>5. Estimated Time Investment</h2>
+    <p>This is designed to be a rapid prototype for an engineering team familiar with microcontrollers.</p>
+    <ul>
+        <li><strong>Research & Component Sourcing:</strong> 5 hours</li>
+        <li><strong>Phase 1 (Breadboarding & Sensor Code):</strong> 10 - 15 hours</li>
+        <li><strong>Phase 2 (Wireless Comms & Dashboard):</strong> 15 hours</li>
+        <li><strong>Phase 3 (Soldering/PCB & Power Management):</strong> 10 hours</li>
+        <li><strong>Phase 4 (3D Modeling & Physical Testing):</strong> 15 hours</li>
+        <li><strong>Total Estimated Time:</strong> ~55 - 60 hours</li>
+    </ul>
+
+</div>
+
+</body>
+</html>
